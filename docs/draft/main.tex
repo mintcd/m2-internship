@@ -1,0 +1,61 @@
+\documentclass[a4paper,twoside]{report}
+\usepackage[utf8]{inputenc}
+% \usepackage[a4paper, width=150mm, top=25mm, bottom=25mm, bindingoffset=6mm]{geometry}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+ \fancyhead{}
+ \fancyhead[LO,LE]{\leftmark}
+ \fancyfoot{}
+ \fancyfoot[CO,CE]{\thepage}
+ \renewcommand{\headrulewidth}{0.2pt}
+ \renewcommand{\footrulewidth}{0.2pt}
+ \setlength{\headheight}{14.5pt}
+
+
+% \usepackage{epsfig,epic,eepic,units}
+\usepackage{hyperref} %allows to add hyperlinks and cross reference in-text
+\usepackage{textcomp} %this is for symbols such as copyright etc
+\usepackage{url} %for adding urls obvs so they appear always in one line without breaks
+\usepackage{longtable} %allows you to make tables of two or more pages
+\usepackage{mathrsfs} %maths fonts, might not need
+\usepackage{array} %extends array and tabular environments
+\usepackage{multirow} %for tables again
+\usepackage{bigstrut} %tables
+\usepackage{amssymb} %adding arrows tbh for chemistry you can just use chemmacros \begin{reaction} environment
+\usepackage{amsmath} %for writing maths
+\usepackage{adjustbox}%supplement to graphics package
+\usepackage{graphicx}
+\usepackage{lscape} %allows to add certain pages in landscape
+\usepackage[nottoc]{tocbibind} %this adds bibliography to your ToC
+\usepackage{textgreek} %for upright greek letters
+\usepackage{siunitx} %you can declare the units you want as necessary read documentation
+\usepackage{biblatex}
+\usepackage[
+    asymmetric,
+    a4paper,
+    left=3cm,
+    right=2cm,
+    top=2.75cm,
+    bottom=3cm,
+    footskip=20pt,
+    twoside]{geometry}
+
+    \usepackage{tikz}
+\usetikzlibrary {automata, positioning, shapes, arrows.meta}
+\usepackage{enumitem}
+\usepackage{pifont}
+
+% add commands
+\usepackage{commands}
+
+
+\addbibresource{refs.bib}
+
+\begin{document}
+\sloppy
+
+\input{sections/block-graph.tex}
+
+% \printbibliography
+
+\end{document}

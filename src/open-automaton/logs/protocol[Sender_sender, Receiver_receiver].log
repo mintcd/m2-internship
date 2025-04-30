@@ -1,0 +1,25 @@
+States: q0-s0-r0, q0-s1-r0
+Variables: dataToSend, dataOnFly, dataReceived, dataDone, ackOnFly, s_seq, s_ack, sent, r_seq, r_ack, received
+Transitions:
+
+	sendData-send0: {}((includes(dataToSend, data)) && (isDeepEqual(dataToSend[0], data))){dataOnFly: [...dataOnFly, { ...data, ...opts }], sent: data} | q0-s0-r0 --sendData(data)--> q0-s1-r0
+
+	receiveAckValid-receiveValid0: {}((includes(ackOnFly, data)) && (data.seq === s_seq && data.ack === s_ack)){ackOnFly: remove(ackOnFly, data), dataToSend: remove(dataToSend, data), dataDone: [...dataDone, data], s_seq: 1 - s_seq, s_ack: 1 - s_ack} | q0-s1-r0 --receiveAck(data)--> q0-s0-r0
+
+	receiveAckInvalid-receiveInvalid0: {}((includes(ackOnFly, data)) && (!data.seq === s_seq || !data.ack === s_ack)){ackOnFly: remove(ackOnFly, data)} | q0-s1-r0 --receiveAck(data)--> q0-s0-r0
+
+	receiveData0-receive: {}((includes(dataOnFly, data)) && (True)){dataOnFly: remove(dataOnFly, data), dataReceived: [...dataReceived, data], received: data} | q0-s0-r0 --receiveData(data)--> q0-s0-r0
+
+	receiveData1-receive: {}((includes(dataOnFly, data)) && (True)){dataOnFly: remove(dataOnFly, data), dataReceived: [...dataReceived, data], received: data} | q0-s1-r0 --receiveData(data)--> q0-s1-r0
+
+	sendAck0-send: {}((includes(dataReceived, data)) && (isDeepEqual(data, received) && data.seq === r_seq && data.ack === r_ack)){dataReceived: remove(dataReceived, data), ackOnFly: [...ackOnFly, { ...opts }], r_seq: 1 - r_seq, r_ack: 1 - r_ack} | q0-s0-r0 --sendAck(data)--> q0-s0-r0
+
+	sendAck1-send: {}((includes(dataReceived, data)) && (isDeepEqual(data, received) && data.seq === r_seq && data.ack === r_ack)){dataReceived: remove(dataReceived, data), ackOnFly: [...ackOnFly, { ...opts }], r_seq: 1 - r_seq, r_ack: 1 - r_ack} | q0-s1-r0 --sendAck(data)--> q0-s1-r0
+
+	loseData00: {}(dataOnFly.includes(data)){dataOnFly: remove(dataOnFly, i)} | q0-s0-r0 --loseData(data)--> q0-s0-r0
+
+	loseData10: {}(dataOnFly.includes(data)){dataOnFly: remove(dataOnFly, i)} | q0-s1-r0 --loseData(data)--> q0-s1-r0
+
+	loseAck00: {}(includes(ackOnFly, ack)){ackOnFly: remove(ackOnFly, ack)} | q0-s0-r0 --loseAck(ack)--> q0-s0-r0
+
+	loseAck10: {}(includes(ackOnFly, ack)){ackOnFly: remove(ackOnFly, ack)} | q0-s1-r0 --loseAck(ack)--> q0-s1-r0

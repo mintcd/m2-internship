@@ -1,0 +1,50 @@
+\chapter{Open Automata}
+\section{Open Automaton for Sliding Window Protocols}
+
+Description
+
+\begin{itemize}
+  \item If the frame to send does not lie outside of the window, send this frame
+  \item If the correct ACK is send, increase the window index by 1 and take modulo $N$
+\end{itemize}
+
+We use a fix window size $N$ and a limit waiting time $T > 0$. Variables are
+\begin{itemize}
+  \item The window index $w$
+  \item The current frame's index $i$
+  \item The waited time $t$
+\end{itemize}
+
+The Sender can dispatch \texttt{getFrame}, \texttt{send}, \texttt{wait}, \texttt{resend}. Meanwhile, the Receiver can dispatch \texttt{ack} when a frame is delivered correctly. Therefore, the transitions are as follows
+
+$$\begin{aligned}
+    s_1 & = \dfrac{\{\text{Sender}\mapsto \texttt{getFrame}(i)\}(\text{True})\{\}}{q_0\xrightarrow{\tau}q_0}                                \\
+    s_2 & = \dfrac{\{\text{Sender}\mapsto \texttt{send}(M[i])\}((i+1)\% N \neq w)\{i:= (i + 1)\%N\}}{q_0\xrightarrow{\text{frameSent}}q_0}  \\
+    s_3 & = \dfrac{\{\text{Sender}\mapsto \texttt{wait}\}((i+1)\% N = w \wedge t < T)\{t:= t + 1\}}{q_0\xrightarrow{\tau}q_0}               \\
+    s_4 & = \dfrac{\{\text{Sender}\mapsto \texttt{resend}(M[w])\}(t = T)\{t:= 0\}}{q_0\xrightarrow{\text{frameResent}}q_0}                  \\
+    t_1 & = \dfrac{\{\text{Receiver}\mapsto \texttt{ack}(M[w])\}(w \neq i)\{w:= (w + 1)\%N; t:= 0\}}{q_0\xrightarrow{\text{frameAcked}}q_0} \\
+  \end{aligned}
+$$
+
+\begin{center}
+  \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+
+    \node[]               (init_assign)
+    {};
+    \node[state, accepting] (q_0) [right=4cm of init_assign] {$q_0$};
+
+
+    \path[->]
+    (init_assign) edge node {$\begin{Bmatrix}
+            \text{waitedTime} = 0   \\
+            \text{windowIndex} = 0  \\
+            \text{currentIndex} = 0 \\
+          \end{Bmatrix}$} (q_0)
+    (q_0) edge [loop, in=-60, out=-90, looseness=10] node[pos=0.5, anchor=north] {$t_1$} (q_0)
+    (q_0) edge [loop, in=-10, out=-40, looseness=10] node[pos=0.5, anchor=north] {$t_2$} (q_0)
+    (q_0) edge [loop, in=40, out=10, looseness=10] node[pos=0.5, anchor=south] {$t_3$} (q_0)
+    (q_0) edge [loop, in=90, out=60, looseness=10] node[pos=0.5, anchor=south] {$t_3$} (q_0)
+    ;
+
+  \end{tikzpicture}
+\end{center}

@@ -1,0 +1,46 @@
+(q0-s0-r0, {
+	dataToSend: [{"info":0},{"info":1},{"info":2},{"info":3},{"info":4}]
+	dataOnFly: []
+	dataReceived: []
+	dataDone: []
+	ackOnFly: []
+	s_seq: 0
+	s_ack: 1
+	r_seq: 0
+	r_ack: 1 
+})
+
+{}((includes(dataToSend, data)) && (isDeepEqual(dataToSend[0], data))){dataOnFly: [...dataOnFly, { ...data, ...opts }], sent: data}
+q0-s0-r0 --------------------------------------- sendData(data:{"info":0}) -------------------------------------------------> q0-s1-r0
+
+
+(q0-s1-r0, {
+	dataToSend: [{"info":0},{"info":1},{"info":2},{"info":3},{"info":4}]
+	dataOnFly: [{"info":0,"seq":0,"ack":1}]
+	dataReceived: []
+	dataDone: []
+	ackOnFly: []
+	s_seq: 0
+	s_ack: 1
+	r_seq: 0
+	r_ack: 1
+	sent: {"info":0} 
+})
+
+{}(dataOnFly.includes(data)){dataOnFly: remove(dataOnFly, i)}
+q0-s1-r0 --------------------------------------- loseData(data:undefined) -------------------------------------------------> q0-s1-r0
+
+
+(q0-s1-r0, {
+	dataToSend: [{"info":0},{"info":1},{"info":2},{"info":3},{"info":4}]
+	dataOnFly: []
+	dataReceived: []
+	dataDone: []
+	ackOnFly: []
+	s_seq: 0
+	s_ack: 1
+	r_seq: 0
+	r_ack: 1
+	sent: {"info":0} 
+})
+

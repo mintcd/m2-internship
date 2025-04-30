@@ -1,0 +1,15 @@
+{
+  "cSpell.words": [
+    "Acked",
+    "Acks",
+    "ACSYON",
+    "mathcal",
+    "nodenext",
+    "resends",
+    "Unacked"
+  ],
+  "cSpell.ignorePaths": [
+    "**/*/main.tex",
+    "**/*.sty"
+  ]
+}

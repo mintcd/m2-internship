@@ -1,0 +1,21 @@
+States: q0
+Variables: dataToSend, dataOnFly, dataReceived, dataDone, ackOnFly
+Transitions:
+
+	sendData: {Sender: send(dataToSend, data, opts)}(includes(dataToSend, data)){dataOnFly: [...dataOnFly, { ...data, ...opts }]} | q0 --sendData(data)--> q0
+
+	receiveAckValid: {Sender: receiveValid(data)}(includes(ackOnFly, data)){ackOnFly: remove(ackOnFly, data), dataToSend: remove(dataToSend, data), dataDone: [...dataDone, data]} | q0 --receiveAck(data)--> q0
+
+	receiveAckInvalid: {Sender: receiveInvalid(data)}(includes(ackOnFly, data)){ackOnFly: remove(ackOnFly, data)} | q0 --receiveAck(data)--> q0
+
+	process1: {Sender: process(opts)}(True){} | q0 --tau()--> q0
+
+	receiveData: {Receiver: receive(data)}(includes(dataOnFly, data)){dataOnFly: remove(dataOnFly, data), dataReceived: [...dataReceived, data]} | q0 --receiveData(data)--> q0
+
+	sendAck: {Receiver: send(dataReceived, data, opts)}(includes(dataReceived, data)){dataReceived: remove(dataReceived, data), ackOnFly: [...ackOnFly, { ...opts }]} | q0 --sendAck(data)--> q0
+
+	process2: {Receiver: process(opts)}(True){} | q0 --tau()--> q0
+
+	loseData: {}(dataOnFly.includes(data)){dataOnFly: remove(dataOnFly, i)} | q0 --loseData(data)--> q0
+
+	loseAck: {}(includes(ackOnFly, ack)){ackOnFly: remove(ackOnFly, ack)} | q0 --loseAck(ack)--> q0

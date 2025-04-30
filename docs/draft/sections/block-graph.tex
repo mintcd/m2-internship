@@ -1,0 +1,34 @@
+\section{Block graph}
+
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
+    % Outer blue rectangle with text
+    \node[draw, fill=blue!20, rounded corners=5pt, minimum width=10cm, minimum height=5cm, anchor=south west]
+    (Main) at (0,0) {};
+
+    \node[draw, fill=white, rounded corners=5pt, minimum width=3cm, minimum height=2cm, anchor=south west, align=left]
+    (Sender) at (1,1.5) {Sender};
+
+    \node[circle, fill=black, inner sep=2pt] (sendFrameBase) at (1.5,3.5) {};
+    \node[above=1pt of sendFrameBase] (sendFrame) {sendFrame};
+
+    \node[circle, fill=black, inner sep=2pt] (waitBase) at (3.5,3.5) {};
+    \node[above=1pt of waitBase] (wait) {wait};
+
+    \node[circle, fill=black, inner sep=2pt] (receiveAckBase) at (2,1.5) {};
+    \node[below=1pt of receiveAckBase] (receiveAck) {receiveAck};
+
+    \node[draw, fill=white, rounded corners=5pt, minimum width=3cm, minimum height=2cm, anchor=south west, align=left]
+    (Receiver) at (6,1.5) {Receiver};
+
+    \node[circle, fill=black, inner sep=2pt] (receiveFrameBase) at (6.5,3.5) {};
+    \node[above=1pt of receiveFrameBase] (receiveFrame) {receiveFrame};
+    \node[circle, fill=black, inner sep=2pt] (processBase) at (8.5,3.5) {};
+    \node[above=1pt of processBase] (process) {process};
+    \node[circle, fill=black, inner sep=2pt] (sendAckBase) at (7,1.5) {};
+    \node[below=1pt of sendAckBase] (sendAck) {sendAck};
+
+
+  \end{tikzpicture}
+\end{figure}

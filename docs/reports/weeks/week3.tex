@@ -1,0 +1,56 @@
+\section{Different Behaviors for the Holes}
+% For different behaviors to be observable. Let $sentTotal$ and $ackedTotal$ be number of sent frames and acknowledged frames in total.
+
+
+We build an OA serving as a prototype for connection-oriented communication protocols. Let $N$ be the number of data units to be sent, whose index ranges from $0$ to $N-1$. There are two holes, namely Sender and Receiver. The Sender invokes actions \texttt{send, receive} and \texttt{process}, corresponding to sending a data unit, receiving an acknowledgement and doing an internal work, such as waiting until timeout. The Receiver also invokes actions \texttt{send}, \texttt{receive} and \texttt{process}, but here it sends an acknowledgement and receives a data unit. A data unit or an acknowledgement may also be lost during transmission. From the environment's perspective, a data unit can be in one of the following situation
+
+\begin{itemize}
+	\item it needs to be sent,
+	\item it is on fly i.e. it was sent by the Sender but not arrives at the Receiver yet,
+	\item it has been received by the Receiver, or
+	\item it has been sent and acknowledged successfully.
+\end{itemize}
+
+Hence we use four variables of type lists $D_{\text{tosend}}$, $D_{\text{onfly}}$, $D_{\text{received}}$ and $D_{\text{done}}$ to store the indices of the data units in these situations. For an acknowledgement, it can also by on fly, which is store in $A_\text{onfly}$. We do not need to store received acknowledgements because the Sender  processes an acknowledgement immediately when receiving it. The initial values are $D_{\text{tosend}} = [0,\ldots, N-1]$ and $D_{\text{onfly}}=D_{\text{received}}=D_{\text{done}}=A_{\text{onfly}}=[]$. We use two operation on a list $L$
+
+\begin{itemize}
+	\item $L.\text{push}(i)$: appending $i$ to the list, and
+	\item $L.\text{pop}(i)$: removing $i$ in its first appearance from the list or return the old list if there is no $i$
+\end{itemize}
+
+and a function $\min(L)$ to find the minimal element in the list. The transitions are given in the following table.
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{|c|c|c|c|c|c|c|}
+		\hline
+		N.O. & Source & Target & Action                  & Hole actions                                  & Guard                         & Reassignment                                                                                                                                         \\
+		\hline
+		1    & $q_0$  & $q_0$  & $\text{sendData}(i)$    & $\text{Sender}\mapsto \texttt{send}(i)$       & $i = \min(D_{\text{tosend}})$ & $D_{\text{onfly}}.\text{push}(i)$                                                                                                                    \\
+		\hline
+		2    & $q_0$  & $q_0$  & $\text{receiveAck}(i)$  & $\text{Sender}\mapsto \texttt{receive}(i)$    & $i \in A_{\text{onfly}}$      & \begin{tabular}{@{}c@{}}$A_{\text{onfly}}.\text{pop}(i)$ \\ $D_{\text{tosend}}.\text{pop}(i)$\end{tabular}  \\
+		\hline
+		3    & $q_0$  & $q_0$  & $\tau$                  & $\text{Sender}\mapsto \texttt{process}(opts)$ & True                          &                                                                                                                                                      \\
+		\hline
+		4    & $q_0$  & $q_0$  & $\text{receiveData}(i)$ & $\text{Receiver}\mapsto \texttt{receive}(i)$  & $i\in D_{\text{onfly}}$       & \begin{tabular}{@{}c@{}}$D_{\text{onfly}}.\text{pop}(i)$ \\ $D_{\text{received}}.\text{push}(i)$\end{tabular} \\
+		\hline
+		5    & $q_0$  & $q_0$  & $\text{sendAck}(i)$     & $\text{Receiver}\mapsto \texttt{send}(i)$     & $i\in D_{\text{received}}$    & $D_{\text{received}}.\text{pop}(i)$                                                                                                                  \\
+		\hline
+
+		6    & $q_0$  & $q_0$  & $\tau$                  & $\text{Sender}\mapsto \texttt{process}(opts)$ & True                          &                                                                                                                                                      \\
+		\hline
+		7    & $q_0$  & $q_0$  & loseData$(i)$           &                                               & $i\in D_\text{onfly}$         & $D_{\text{onfly}}.\text{pop}(i)$                                                                                                                     \\
+		\hline
+		8    & $q_0$  & $q_0$  & loseAck$(i)$            &                                               & $i\in A_\text{onfly}$         & $A_{\text{onfly}}.\text{pop}(i)$                                                                                                                     \\
+		\hline
+	\end{tabular}
+	\caption{Transition Table for Protocol OA}
+	\label{tab:transitions}
+\end{table}
+
+An protocol implementing the Sender and Receiver is correct if given the initial assignments of the lists, the composed OA always arrives at a terminal state with $D_\text{done} = [1,\ldots,N]$.
+
+Consider and example. Let $D_{\text{tosend}} = [0, 1, 2]$ and $D_{\text{onfly}}=D_{\text{received}}=D_{\text{done}}=A_{\text{onfly}}=[]$. Denote by $(D_{\text{tosend}}, D_{\text{onfly}}, D_{\text{received}}, A_{\text{onfly}})$ each configuration of the OA. One possible run is
+\begin{align*}
+	([0,1,2], [], [], [], []) \xrightarrow{\text{sendData}(0)} ([1,2], [0], [], [], [])
+\end{align*}

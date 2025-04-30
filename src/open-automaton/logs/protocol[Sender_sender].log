@@ -1,0 +1,25 @@
+States: q0-s0, q0-s1
+Variables: dataToSend, dataOnFly, dataReceived, dataDone, ackOnFly, s_seq, s_ack
+Transitions:
+
+	sendData-send: {}((includes(dataToSend, data)) && (isDeepEqual(dataToSend[0], data))){dataOnFly: [...dataOnFly, { ...data, ...opts }]} | q0-s0 --sendData(data)--> q0-s1
+
+	receiveAck-receive: {}((includes(ackOnFly, ack)) && (True)){ackOnFly: remove(ackOnFly, i), dataToSend: remove(dataToSend, i), s_seq: ({ s_seq: 1 - s_seq }), s_ack: ({ s_ack: 1 - s_ack })} | q0-s1 --receiveAck(ack)--> q0-s0
+
+	receiveData0: {Receiver: receive(data)}(includes(dataOnFly, data)){dataOnFly: remove(dataOnFly, data), dataReceived: [...dataReceived, data]} | q0-s0 --receiveData(data)--> q0-s0
+
+	receiveData1: {Receiver: receive(data)}(includes(dataOnFly, data)){dataOnFly: remove(dataOnFly, data), dataReceived: [...dataReceived, data]} | q0-s1 --receiveData(data)--> q0-s1
+
+	sendAck-send: {}((includes(dataReceived, data)) && (isDeepEqual(dataToSend[0], data))){dataReceived: remove(dataReceived, data), ackOnFly: [...ackOnFly, { ...opts }]} | q0-s0 --sendAck(data)--> q0-s1
+
+	process20: {Receiver: process(opts)}(True){} | q0-s0 --tau()--> q0-s0
+
+	process21: {Receiver: process(opts)}(True){} | q0-s1 --tau()--> q0-s1
+
+	loseData0: {}(dataOnFly.includes(data)){dataOnFly: remove(dataOnFly, i)} | q0-s0 --loseData(data)--> q0-s0
+
+	loseData1: {}(dataOnFly.includes(data)){dataOnFly: remove(dataOnFly, i)} | q0-s1 --loseData(data)--> q0-s1
+
+	loseAck0: {}(includes(ackOnFly, ack)){ackOnFly: remove(ackOnFly, ack)} | q0-s0 --loseAck(ack)--> q0-s0
+
+	loseAck1: {}(includes(ackOnFly, ack)){ackOnFly: remove(ackOnFly, ack)} | q0-s1 --loseAck(ack)--> q0-s1
