@@ -1,0 +1,14 @@
+Session type: μS.?Frame.⊕{ack:!Ack.&{continue:S, end:end}, unack:S}
+Received: 1
+Selected: ack
+Sent: 1
+Offered: received branch 'continue'
+Received: 2
+Selected: ack
+Sent: 2
+Offered: received branch 'continue'
+Received: 3
+Selected: ack
+Sent: 3
+Offered: received branch 'end'
+Ended

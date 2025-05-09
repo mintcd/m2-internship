@@ -6,6 +6,7 @@
     "mathcal",
     "nodenext",
     "resends",
+    "unack",
     "Unacked"
   ],
   "cSpell.ignorePaths": [

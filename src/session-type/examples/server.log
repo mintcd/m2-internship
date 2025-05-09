@@ -1,0 +1,20 @@
+μS.!Frame.&{
+  ack:?Ack.⊕{
+      continue:S,
+      end:end
+},
+  unack:S
+}
+Sent: 1
+Offered: received branch 'ack'
+Received ack: 1
+Selected: continue
+Sent: 2
+Offered: received branch 'ack'
+Received ack: 2
+Selected: continue
+Sent: 3
+Offered: received branch 'ack'
+Received ack: 3
+Selected: end
+Ended
