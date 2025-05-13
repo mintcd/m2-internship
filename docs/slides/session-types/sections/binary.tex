@@ -1,0 +1,214 @@
+\section{Binary Session Types}
+
+\begin{frame}{Type Syntax}
+  One version is \footnote{Dardha, Ornela, Elena Giachino, and Davide Sangiorgi. "Session types revisited." Proceedings of the 14th symposium on Principles and practice of declarative programming. 2012.}
+  \begin{center}
+    \begin{minipage}{0.48\textwidth}
+      $$\begin{array}{lclr}
+          T & ::= & S      & \text{(session type)}     \\
+            & |   & \cdots & \text{(other constructs)}
+        \end{array}$$
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+      $$\begin{array}{lclr}
+          S & ::= & \texttt{end}                  & \text{(termination)} \\
+            & |   & ?T.S                          & \text{(receive)}     \\
+            & |   & !T.S                          & \text{(send)}        \\
+            & |   & \&\{\ell_i:S_i\}_{i\in I}     & \text{(branch)}      \\
+            & |   & \oplus\{\ell_i:S_i\}_{i\in I} & \text{(select)}      \\
+        \end{array}$$
+    \end{minipage}
+  \end{center}
+  \textbf{Note:} The suffix of a type is always \texttt{end}, a branch or a select.
+\end{frame}
+
+\begin{frame}{Type Syntax}
+  Example: Mathematical server type that receives two integers and sends a result whether they are equal, then ends the session
+  $$?\texttt{Int}.?\texttt{Int}.!\texttt{Bool}.\texttt{end}.$$
+  But there are also weird types like
+  \begin{align*}
+    T \longrightarrow S \longrightarrow ?T.S \longrightarrow ?T.\texttt{end} \longrightarrow ?S.\texttt{end} \\
+    \longrightarrow ??T.S.\texttt{end} \longrightarrow ??T.\texttt{end}.\texttt{end} \longrightarrow ??\texttt{Int}.\texttt{end}.\texttt{end}
+  \end{align*}
+  There may be no problem in practice.
+
+  Qualifiers \texttt{lin} and \texttt{un} are invented to solve this.
+\end{frame}
+
+\begin{frame}{Type Syntax}
+  Alternative \footnote{\href{https://stanford-cs242.github.io/f19/lectures/09-1-session-types}{CS242 Lecture 9.1}}
+  \begin{center}
+    \begin{minipage}{0.48\textwidth}
+      $$\begin{array}{lclr}
+          T & ::= & S & \text{(session type)} \\
+            & |   & D & \text{(data type)}
+        \end{array}$$
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+      $$\begin{array}{lclr}
+          S & ::= & \texttt{end}                  & \text{(termination)}            \\
+            & |   & ?D.S                          & \text{(receive)}                \\
+            & |   & !D.S                          & \text{(send)}                   \\
+            & |   & \&\{\ell_i:S_i\}_{i\in I}     & \text{(branch)}                 \\
+            & |   & \oplus\{\ell_i:S_i\}_{i\in I} & \text{(select)}                 \\
+            & |   & \mu\alpha.S                   & \text{(recursive session type)} \\
+            & |   & \alpha                        & \text{(session type variable)}
+        \end{array}$$
+    \end{minipage}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Type Syntax}
+  Example: Session type for ATM protocol from \textit{ATM's point of view}
+  \begin{align*}
+    S_\text{ATM} = \,\,?\text{String}.\oplus
+    \begin{cases}
+      \text{auth:} & \mu\alpha.\&
+      \begin{cases}
+        \text{deposit:}   & ?Int.!Int.\alpha \\
+        \text{withdraw:}  & ?Int.\oplus
+        \begin{cases}
+          \text{ok:}  & \alpha       \\
+          \text{err:} & \texttt{end} \\
+        \end{cases}           \\
+        \text{terminate:} & \texttt{end}
+      \end{cases} \\
+      \text{err:}  & \texttt{end}
+    \end{cases}
+  \end{align*}
+
+\end{frame}
+
+\begin{frame}
+  The client uses the type $S_{\text{Clt}}$ dual to ensure agreement. Rules for duality are
+  \begin{align*}
+    \overline{\texttt{end}}                  & = \texttt{end}                             \\
+    \overline{?D.S}                          & = !D.\overline{S}                          \\
+    \overline{!D.S}                          & = ?D.\overline{S}                          \\
+    \overline{\&\{\ell_i:S_i\}_{i\in I}}     & = \oplus\{\ell_i:\overline{S_i}\}_{i\in I} \\
+    \overline{\oplus\{\ell_i:S_i\}_{i\in I}} & = \&\{\ell_i:\overline{S_i}\}_{i\in I}     \\
+    \overline{\mu\alpha.S}                   & = \mu\alpha.\overline{S}
+  \end{align*}
+
+  \textbf{Note:} Having known the type for one side, we know the type for the other side.
+\end{frame}
+
+\begin{frame}{Process syntax}
+  Major notions
+  \begin{itemize}
+    \item Input, output, branching, selection
+    \item Channel: using one polarized channel variable or two channel variables (we consider the latter)
+    \item Composition (two processes running at the same time)
+    \item Inaction (process stops)
+  \end{itemize}
+
+  Assumptions: a set of variables ranged by $x,y,\ldots$, possibly with subscripts and a set expressions over these variables.
+\end{frame}
+
+\begin{frame}{Process syntax}
+  \begin{center}
+    \begin{minipage}{0.48\textwidth}
+      $$\begin{array}{lclr}
+          P,Q & ::= & x!\langle v\rangle.P                      & \text{(output)}    \\
+              & |   & x!(y).P                                   & \text{(input)}     \\
+              & |   & x \triangleright \{\ell_i: P_i\}_{i\in I} & \text{(branching)} \\
+              & |   & x \triangleleft \ell_j.P                  & \text{(selection)} \\
+        \end{array}$$
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+      $$\begin{array}{lclr}
+           & | & \mathbf{0}                                   & \text{(inaction)}         \\
+           & | & P | Q                                        & \text{(composition)}      \\
+           & | & (\bm{\nu} xy)P                               & \text{(channel creation)} \\
+           & | & \text{if } v \text{ then } P \text{ else } Q & \text{(conditional)}
+        \end{array}$$
+    \end{minipage}
+  \end{center}
+
+  % \textbf{Note:} What if a process need to select conditionally? We can add to the syntax, for example
+  % $$\text{case}(e)\{v_i : P_i\}_{i\in I}, \text{or}$$
+  % $$\text{if } e \text{ then }P\text{ else }Q.$$
+  % then redefine compatibility and calculus.
+\end{frame}
+
+\begin{frame}{Typing rules}
+  Typing environment $\Gamma$ is a map from identifiers to types. By convention, $\Gamma, x: T$ means overwrite $x$ with type $T$.
+
+  Basic typing rules \footnote{Honda, Kohei, Vasco T. Vasconcelos, and Makoto Kubo. "Language primitives and type discipline for structured communication-based programming." European Symposium on Programming. Berlin, Heidelberg: Springer Berlin Heidelberg, 1998.}
+  \begin{center}
+    \begin{minipage}{0.48\textwidth}
+      $$\dfrac{\Gamma, x: T_2 \vdash P}{\Gamma, y:T_1, x:!T_1.T_2 \vdash x!\langle y\rangle.P}$$
+      Read: If $P$ uses $x$ with type $T_2$, then we can use $x$ with type $!T_1.T_2$ to send a message bound in $y$ of type $T_1$, then safely continue as $P$.
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+      $$\dfrac{\Gamma, y: T_1, x: T_2 \vdash P}{\Gamma, x:?T_1.T_2 \vdash x?(y).P}$$
+      Read: If $P$ uses $y$ with type $T_1$ and $x$ with type $T_2$, then we can use $x$ of type $?T_1.T_2$ to receive a message, bind it into $y$, then safely continue as $P$.
+    \end{minipage}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Typing rules}
+  Or we can distinguish between session types and data types.
+  \begin{center}
+    \begin{minipage}{0.48\textwidth}
+      $$\dfrac{\Gamma, x: S \vdash P}{\Gamma, y:D, x:!D.S \vdash x!\langle y\rangle.P}$$
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+      $$\dfrac{\Gamma, y: D, x: S \vdash P}{\Gamma, x:?D.S \vdash x?(y).P}$$
+    \end{minipage}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Process calculus}
+  Rules to ``run'' processes, defined using a reduction relation $\longrightarrow$. There is also a structural congruence relation $\equiv$.
+
+  Recall types $S_\text{ATM}$ and $S_\text{Clt}$. Consider two processes
+
+  $$clt(x: S_\text{Clt}) = x!\langle ``abcde'' \rangle. x \triangleright
+    \begin{cases}
+      \text{auth:} x\triangleleft \text{deposit}. x!50.x?a.x\triangleleft \text{terminate}.\texttt{end} \\
+      \text{err:} \texttt{end}
+    \end{cases}$$
+
+  Suppose that $d$ saves the current balance.
+
+  $$atm(y: S_\text{ATM}) = y?(b). \text{if } (b = ``abcde'') y \triangleleft \text{auth}. atm_{auth}  \text{ else } y \triangleleft \text{err}.\texttt{end}$$
+  $$atm_{auth}(y) = y \triangleright
+    \begin{cases}
+      \text{deposit:} y?(c).y!\langle d+c \rangle.atm_{auth}(y)                                                                                \\
+      \text{withdraw:} y?(c). \text{ if } (d > c) y\triangleleft \text{ok}.atm_{auth}(y) \text{ else } y \triangleleft \text{err}.\texttt{end} \\
+      \text{terminate:} \texttt{end}
+    \end{cases}$$
+\end{frame}
+
+\begin{frame}{Process calculus}
+  \begin{align*}
+    (\nu xy)\bigl(clt(x: S_\text{Clt})                                                                  & | atm(y: S_\text{ATM})\bigr)                                                                                                             \\
+    (\nu xy)(x!\langle ``abcde'' \rangle. x \triangleright \ldots                                       & \big| y?(b). \text{if } (b = ``abcde'') y \triangleleft \text{auth}. atm_{auth}  \text{ else } y \triangleleft \text{err}.\texttt{end})  \\
+    (\nu xy)(x \triangleright \ldots                                                                    & \big| \text{if } (``abcde'' = ``abcde'') y \triangleleft \text{auth}. atm_{auth}  \text{ else } y \triangleleft \text{err}.\texttt{end}) \\
+    (\nu xy)\Biggl(x \triangleright  \begin{cases}
+                                       \text{auth:} \ldots \\
+                                       \text{err:} \texttt{end}
+                                     \end{cases}                                                      & \Bigg|  y \triangleleft \text{auth}. atm_{auth}\Biggr)                                                                                     \\
+    (\nu xy)\Biggl(x\triangleleft \text{deposit}. x!50.x?a.x\triangleleft \text{terminate}.\texttt{end} & | y \triangleright
+    \begin{cases}
+      \text{deposit:} y?(c).y!\langle d+c \rangle.atm_{auth}(y) \\
+      \ldots
+    \end{cases}\Biggr)                                                                                                                                                                                      \\
+    (\nu xy)(x!50.x?a.x\triangleleft \text{terminate}.\texttt{end}                                      & | y?(c).y!\langle d+c \rangle.atm_{auth}(y))                                                                                             \\
+    (\nu xy)(x?a.x\triangleleft \text{terminate}.\texttt{end}                                           & | y!\langle d+50 \rangle.atm_{auth}(y))                                                                                                  \\
+    (\nu xy)(x\triangleleft \text{terminate}.\texttt{end}                                               & | atm_{auth}(y))                                                                                                                         \\
+    (\nu xy)(\texttt{end}                                                                               & | \texttt{end})                                                                                                                          \\
+  \end{align*}
+\end{frame}
+
+\begin{frame}{Process calculus}
+  Selecting is basically sending a label. There are formalisms that all transmissions are labeled.
+
+  There can be different notions for successful communication: progress, both sides end, only client ends.
+\end{frame}

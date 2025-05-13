@@ -1,0 +1,21 @@
+\section{Multiparty session types}
+
+\begin{frame}{Syntax}
+  Global type:
+  $$\begin{array}{lclr}
+      G & ::= & end                                      & \text{(terminate)}    \\
+        & |   & p\rightarrow q(D).G                      & \text{(send-receive)} \\
+        & |   & p\rightarrow q \{\ell_i : G_i\}_{i\in I} & \text{(select-offer)}
+    \end{array}$$
+
+  Local types is binary session types, defined through projection $\downharpoonright_p$.
+  \begin{align*}
+    \texttt{end} \downharpoonright_p                              & = \texttt{end}             \\
+    (p\rightarrow q(D).G)\downharpoonright_p                      & = q!D.G\downharpoonright_p \\
+    (p\rightarrow q(D).G)\downharpoonright_q                      & = p?D.G\downharpoonright_q \\
+    (p\rightarrow q \{\ell_i : G_i\}_{i\in I})\downharpoonright_p & =
+    q \triangleleft   \{\ell_i : G_i\downharpoonright_p     \}_{i\in I}                        \\
+    (p\rightarrow q \{\ell_i : G_i\}_{i\in I})\downharpoonright_q & =
+    p \triangleright \{\ell_i : G_i\downharpoonright_q     \}_{i\in I}                         \\
+  \end{align*}
+\end{frame}

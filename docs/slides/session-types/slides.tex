@@ -1,0 +1,156 @@
+ \documentclass[xcolor=dvipsnames, aspectratio=169, 10pt]{beamer}
+% \usepackage{vntex}
+\usetheme[sectionpage=progressbar,subsectionpage=progressbar]{metropolis}
+\usepackage{tikz}
+\usetikzlibrary{bayesnet}
+\usetikzlibrary{arrows}
+\usetikzlibrary{backgrounds}
+\usepackage{caption}
+\usepackage{animate}
+\usepackage{bm}
+% \setbeamertemplate{caption}[numbered]
+% \usepackage{subcaption}
+
+\usepackage[lined,commentsnumbered]{algorithm2e}
+\beamertemplatenavigationsymbolsempty
+% \useinnertheme{circles}
+%\useoutertheme{split}
+
+\definecolor{background}{HTML}{274150}
+\definecolor{sbackground}{HTML}{b51823}
+\definecolor{main-text}{HTML}{80A07C}
+\definecolor{enumercolor}{HTML}{A4CCE0}
+\definecolor{progress-bar}{HTML}{E6CBA0}\usecolortheme[named=sbackground]{structure} % define for item color, commented Jan 4,2024
+
+%% TITLE PAGE 
+\title[]{Session Types}
+% \subtitle{Deep Learning Project}
+
+% \AtBeginDocument{
+% 	\author[Minh]{
+% 		\begin{tabular}{lll}
+% 			\textit{\small Applicant:} & \small CHAU Dang Minh
+%             \vspace{.5cm}\\
+% 		\end{tabular}
+% 	}
+% }
+% \institute[Limoges]{
+% 	{
+% 		University of Limoges
+% 	}
+% }
+% TOC
+\setbeamertemplate{section in toc}[circle]
+\setbeamercolor{section in toc}{bg=sbackground!40, fg=black} % change color section item
+ \setbeamerfont{section number projected}{size=\large}
+% ENUM
+  % \setbeamercolor{item projected}{bg=red!70!black,fg=white}
+  \setbeamercolor{frametitle}{fg=sbackground,bg=sbackground!40} % change color bar
+  \setbeamercolor{background canvas}{bg=white} % change color frame
+  \setbeamercolor{normal text}{fg=black} % change text color
+\setbeamercolor{progress bar}{fg=progress-bar!110,bg=progress-bar!50} % change progress bar color
+    \setbeamertemplate{enumerate items}[circle]
+    \setbeamerfont{itemize item projected}{size=\huge}
+        \setbeamerfont{item projected}{size=\large}
+% CAPTION
+\setbeamertemplate{caption}{\raggedright\insertcaption\par}
+% LOGO
+\usepackage{textpos} 
+
+\addtobeamertemplate{frametitle}{}{%
+	\begin{textblock*}{100mm}(\textwidth,-.9cm)
+		% \includegraphics[height=.7cm,width=.7cm]{logo.png}
+\end{textblock*}}
+\usepackage{eso-pic}
+\usepackage{pgf}
+\titlegraphic{
+	% \begin{picture}(0,0)
+	% 	\put(420,5){\makebox(0,0)[rt]{\includegraphics[width=3cm]{logo.png}}}
+	% \end{picture}
+}
+\setbeamertemplate{bibliography item}{\insertbiblabel}
+\newcommand{\nologo}{\setbeamertemplate{logo}{}}
+% HEADLINE
+%\setbeamertemplate{headline}{}
+% FOOTLINE
+\setbeamercolor{custom1}{fg=black,bg=mycolor}
+\setbeamercolor{custom2}{fg=black, }
+\setbeamercolor{custom3}{fg=black,}
+\setbeamerfont{footline}{series=\bfseries}%, family=\ttfamily}
+\setbeamertemplate{footline}{%
+	\leavevmode%
+% 	\begin{beamercolorbox}[wd=0.25\textwidth, sep=0.4em, center]{custom1}%
+% 		\strut \quad\insertshortauthor \quad (\insertshortinstitute)
+% 	\end{beamercolorbox}%
+% 	\begin{beamercolorbox}[wd=0.45\textwidth, sep=0.4em, center]{custom2}%
+% 		\strut \insertshorttitle
+% 	\end{beamercolorbox}%
+	\begin{beamercolorbox}[wd=1\textwidth, sep=0.4em, right]{custom3}%
+		\strut \insertframenumber/\inserttotalframenumber
+	\end{beamercolorbox}%
+}
+% Thank you slide
+\makeatletter
+\let\beamer@writeslidentry@miniframeson=\beamer@writeslidentry%
+\def\beamer@writeslidentry@miniframesoff{%
+	\expandafter\beamer@ifempty\expandafter{\beamer@framestartpage}{}% does not happen normally
+	{%else
+		% removed \addtocontents commands
+		\clearpage\beamer@notesactions%
+	}
+}
+\newcommand*{\miniframeson}{\let\beamer@writeslidentry=\beamer@writeslidentry@miniframeson}
+\newcommand*{\miniframesoff}{\let\beamer@writeslidentry=\beamer@writeslidentry@miniframesoff}
+\makeatother
+% COMMAND
+\newcommand\norm[1]{\left\lVert#1\right\rVert}
+\newcommand\sym{\mathcal{S}}
+
+\newcommand{\scrP}{\mathscr{P}}
+% Remove main reference numbering
+\setbeamertemplate{frametitle continuation}{}
+
+% Command for some notations
+\newcommand{\prob}[1]{\text{p}({#1})}
+\newcommand{\expect}[1]{\mathbb{E}({#1})}
+\newcommand{\im}[1]{\text{Im}({#1})}
+\newcommand{\var}[1]{\text{V}({#1})}
+\newcommand{\normal}[2]{\mathcal{N}({#1}, {#2})}
+
+\newcommand{\Pib}{\boldsymbol{\Pi}}
+\newcommand{\Alphab}{\boldsymbol{\Alpha}}
+\newcommand{\Betab}{\boldsymbol{\Beta}}
+\newcommand{\Thetab}{\boldsymbol{\Theta}}
+\newcommand{\Etab}{\boldsymbol{\Eta}}
+\newcommand{\Lambdab}{\boldsymbol{\Lambda}}
+% \addbibresource{refs.bib}
+
+\newcommand{\Zb}{\mathbf{Z}}
+\newcommand{\Xb}{\mathbf{X}}
+\newcommand{\Wb}{\mathbf{W}}
+\newcommand{\KL}{\text{KL}}
+% DOCUMENT
+\begin{document}
+\date{}
+\captionsetup[figure]{labelformat=empty, font={footnotesize,it}}
+\begin{frame}[noframenumbering,plain]
+	\titlepage
+\end{frame}
+
+\begin{frame}
+	\frametitle{Outline}
+	\tableofcontents
+\end{frame}
+
+\include{sections/typed-pi-calculus}
+\include{sections/binary}
+\include{sections/multiparty}
+\include{sections/idea}
+
+\begin{frame}
+	\begin{center}
+		\Huge\textbf{Thank you for listening !}
+	\end{center}
+\end{frame}
+% \printbsibliography
+\end{document}
