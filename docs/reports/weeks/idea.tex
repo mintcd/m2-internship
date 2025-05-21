@@ -1,0 +1,361 @@
+\section{Extended Multiparty Session Type}
+
+An open automaton is a model of a software component or a process that can be modularized. In an open automaton's perspective, another open automaton that can communicate with it is of either of three types: its parent, one of its siblings, one of its children. We add a type self, which indicates the open automaton itself. We assume that the names of open automata in these types. A straightforward way is to index the parent by $\infty$ (the ``farthest'' automaton that can be reached), siblings by $\NN^+=\{1,2,\ldots\}$ (the external), children by $\NN^{-}=\{-1, -2,\ldots\}$ (the internal) and self by $0$. The set of all indices is denoted by $\ZZ\cup\{\infty\}$. Let us take the convention $0\cdot\infty = 0$ due to the convenience of using it in the constraint of the syntax.
+
+\subsection{Syntax}
+
+We want to make use of global type as a description of communication for transitions of open automata. In this way, given an open automaton $A$, a projection should be applicable to checking if an open automaton $A'$ can be composed to a hole of $A$. However, since the projection is a binary session type, it cannot be projected anymore. Hence, if $A'$ itself can have holes, we cannot further check if another open automaton can be composed to one of its hole. Therefore, we will develop a class of extended multiparty session types with the purpose that the projection of an extended multiparty session type to one of its party is also an extended multiparty session type. Then we will later define the notions of a sequence of transitions compatible with an extended multiparty session type, and of an open automaton compatible with an extended multiparty session type. From now on, if there is no ambiguity arising, we will simply call a extended multiparty session type a type and an open automaton an automaton.
+
+
+\begin{figure}[ht]
+  $$\begin{array}{lclr}
+      T & ::= & S & \text{(session type)} \\
+        & |   & D & \text{(data type)}
+    \end{array}$$
+
+  \begin{center}
+    \begin{minipage}{0.48\textwidth}
+      $$\begin{array}{lclr}
+          S & ::= & \texttt{end}           & \text{(termination)}    \\
+            & |   & L.S                    & \text{(sequence)}       \\
+          % & |   & p\rightarrow q\{\ell_i: S_i\}_{i\in I} & \text{(branching)}      \\
+            & |   & \mu\alpha.S            & \text{(recursion)}      \\
+            & |   & \alpha                 & \text{(type variable)}  \\
+            & |   & (S+S)                  & \text{(nondeterminism)} \\
+            & |   & (L_1|L_2|\ldots|L_n).S & \text{(asynchrony)}     \\
+        \end{array}$$
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+      $$\begin{array}{lclr}
+          L    & ::= & p\rightarrow q(D)                                             & \\
+               & |   & \texttt{skip}                                                   \\
+          p,q  & \in & \ZZ\cup\{\infty\}, pq\ge 0                                    & \\
+          D    & ::= & \ell | \texttt{bool} | \texttt{int} | \texttt{string} |\ldots & \\
+          \ell & \in & \L                                                              \\
+        \end{array}$$
+    \end{minipage}
+  \end{center}
+  \caption{The syntax of extended multiparty session type}
+  \label{syntax}
+\end{figure}
+
+The syntax of the extended multiparty session type is shown in Figure \ref{syntax}. The first four rules are the same as those in literature of multiparty session types \cite{honda2008multiparty}. We add a rule for \texttt{skip}. The rule for nondeterminism signifies the fact that at a configuration, there can be multiple possible transitions. We assume a set $\L$ of labels. In this way, we can use this rule as a generalization of the branching rule \cite{honda2008multiparty}.  The rule for asynchrony is to model the fact that each transition of an open automaton can have more than one hole actions. This means we wait for the hole actions to execute asynchronously until they are done, to go along the transition. Denote by $\S$ the set of extended multiparty session types.
+
+
+\subsection{Type Equivalence}
+
+We define the subsequence relation $\subset$ in $\P(\S^2)$ as in Figure \ref{rules:subsequence}. Denote by $\not\subset$ the relation $\P(\S^2)\setminus\subset$. Intuitively, given $S_1\subset S_2$, if an open automaton $A$ can execute a sequence of transitions compatible with $S_2$, then there is a subsequence of these transitions which is compatible with $S_1$. Using the subsection relation, we define type equivalence as the equivalence relation $\equiv$ on $\S$ satisfying the rules given in Figure \ref{rules:equivalence}. The equivalence relation means that, given $S_1\equiv S_2$, the automaton $A$ can execute a sequence of transitions compatible with $S_1$ if and only if it can execute a sequence of transitions compatible with $S_2$.
+
+
+\begin{figure}
+  \begin{center}
+    \begin{minipage}{0.48\textwidth}
+      $$\begin{array}{lclr}
+          S   & \subset & S                                                     & \\
+          L   & \subset & L.S                                                   & \\
+          S   & \subset & L.S                                                   & \\
+          S_j & \subset & p\rightarrow q\{\ell_i: S_i\}_{i\in I},\forall j\in I & \\
+          S   & \subset & \mu\alpha.S                                           & \\
+        \end{array}$$
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+      $$\begin{array}{lclr}
+          S_1 & \subset & (S_1 + S_2)                                & \\
+          S_2 & \subset & (S_1 + S_2)                                & \\
+          L_j & \subset & (L_1|L_2|\ldots|L_n).S, j\in\{1,\ldots,n\} & \\
+          S   & \subset & (L_1|L_2|\ldots|L_n).S                     & \\
+        \end{array}$$
+    \end{minipage}
+  \end{center}
+
+  $$\infer{S_1 \subset S_3}{S_1 \subset S_2 & S_2 \subset S_3}
+  $$
+
+  \caption{The subsequence relation}
+  \label{rules:subsequence}
+\end{figure}
+
+
+\begin{figure}
+  \begin{center}
+    \begin{minipage}{0.48\textwidth}
+      $$\begin{array}{lclr}
+          S                    & \equiv & S.\texttt{skip}        & \textsc{[LSkip]}
+          \\
+          S                    & \equiv & \texttt{skip}.S        & \textsc{[RSkip]}
+          \\
+          S.(S_1+S_2)          & \equiv & S.S_1 + S.S_2          & \textsc{[Dist]}
+          \\
+          \mu\alpha.S          & \equiv & S, \alpha\not\subset S & \textsc{[Jump]}  \\
+          S.\mu\alpha.S.\alpha & \equiv & \mu\alpha.S.\alpha     & \textsc{[Fold]}  \\
+        \end{array}$$
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+      $$\infer{S.S_1\equiv S.S_2}{S_1\equiv S_2}$$
+      $$\infer{S_1.S\equiv S_2.S}{S_1\equiv S_2}$$
+    \end{minipage}
+  \end{center}
+
+
+  \caption{The equivalence relation}
+  \label{rules:equivalence}
+\end{figure}
+
+\subsection{Subtype}
+
+The operational semantics of multiparty session types is a directed graph having each transition of the form \texttt{end}, $L$ or $L_1|\ldots|L_n$. Let $\text{gr}(S)$ be the graph generated by $S$. A trace of $\text{gr}(S)$ is a sequence $L_1,\ldots,L_n$, where there is an edge from $L_i$ to $L_{i+1}$, $L_1$ is the initial node and $L_n$ is a terminal node. A path is a sequence of edges connecting a trace. A type $S_1$ is a subtype of $S_2$, denoted by $S_1\prec S_2$, if every path of $S_1$ is a path of $S_2$.
+
+\subsection{Projection}
+
+A projection is the conversion of a component's perspective on how to communicate to the its child's perspective. The projection only depends on the piece $p\to q$ every time it appears in a session type. In particular, a sub-component can only see a type $p\rightarrow q(D)$ if it is either $p$ or $q$. Hence, let us first ly define an index projection function for each $p\in\NN^{-}$ $\downharpoonright_p:(\ZZ\cup\{\infty\})^2 \to (\ZZ\cup\{\infty\})^2 \cup\{\varnothing\}$, mapping each pair $m\to n$ to either a pair $m'\to n'$, or the empty tuple $\varnothing$.
+
+\begin{center}
+  \begin{minipage}{0.48\textwidth}
+    $$\begin{array}{rlr}
+        p\rightarrow q \downharpoonright_p & =
+
+        \begin{cases}
+          0\rightarrow \infty, & \text{ if } q=0   \\
+          0\rightarrow -q,     & \text{ if } q < 0 \\
+          \varnothing,         & \text{ otherwise} \\
+        \end{cases}
+      \end{array}$$
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.48\textwidth}
+    $$\begin{array}{rlr}
+        q\rightarrow p \downharpoonright_p & =
+        \begin{cases}
+          \infty\rightarrow 0, & \text{ if } q=0   \\
+          -q\rightarrow 0,     & \text{ if } q < 0 \\
+          \varnothing,         & \text{ otherwise} \\
+        \end{cases}
+      \end{array}$$
+  \end{minipage}
+
+  $$m\rightarrow n \downharpoonright_p = \varnothing, \text{ if } m,n\ne p.$$
+\end{center}
+
+We slightly abuse the notation $\downharpoonright_p$ to define inductively the projection function $\downharpoonright_p : \S\to\S$ for each $p\in\NN^{-}$.
+
+\begin{figure}[ht]
+
+  $$\begin{array}{rlr}
+      \texttt{end}\downharpoonright_p  & = \texttt{end}                                                     \\
+      L.S\downharpoonright_p           & = L\downharpoonright_p.S\downharpoonright_p                        \\
+      (\mu\alpha.S)\downharpoonright_p & = \mu\alpha.S\downharpoonright_p                                   \\
+      (S+S)\downharpoonright_p         & = (S\downharpoonright_p+S\downharpoonright_p)                      \\
+      (L|L).S\downharpoonright_p       & = (L\downharpoonright_p|L\downharpoonright_p).S\downharpoonright_p \\
+    \end{array}$$
+
+  $$\begin{array}{rlr}
+      p\rightarrow q \{\ell_i: S_i\}_{i\in I}\downharpoonright_p & =
+      \begin{cases}
+        p\rightarrow q\downharpoonright_p \{\ell_i: S_i\downharpoonright_p\}_{i\in I}, \text{ if } p\rightarrow q\downharpoonright_p\ne\varnothing \\
+        \texttt{skip}, \text{ otherwise}
+      \end{cases} \\
+
+      p\rightarrow q (D)\downharpoonright_p                      & =
+      \begin{cases}
+        p\rightarrow q\downharpoonright_p (D), \text{ if } p\rightarrow q\downharpoonright_p\ne\varnothing \\
+        \texttt{skip}, \text{ otherwise}
+      \end{cases}                                         \\
+    \end{array}$$
+
+  \caption{The projection function}
+\end{figure}
+
+\section{Typed Open Automata}
+Originally, each transition of an open automaton has the form $\dfrac{\beta_j^{j\in J},g,\phi}{s_1\xrightarrow{\alpha} s_2}$, where
+\begin{itemize}
+  \item $s_1\xrightarrow{\alpha} s_2$ denotes a move from a state $s_1$ to a state $s_2$ emitting an action $\alpha$
+  \item $\beta_j^{j\in J}$ is a set of hole actions, identified by a hole name and an action name. For example, it the automaton has hole $P$, then we can write a hole action as $P\mapsto \texttt{send}(m)$ to indicate that $P$ emits the action \texttt{send} with parameter $m$.
+  \item $g$ is a predicate indicating if a move can execute once the hole actions execute.
+  \item $\phi$ is a reassignment of the variables of the automaton if the move happens successfully.
+\end{itemize}
+
+If a hole $P$ executes an internal computation, an unobservable action $\tau$ is usually emitted during the move. However, we note that the parent component should only be able to see the message passing actions of a child component i.e. a hole. Once a specify automaton is composed to the hole can the parent see all its internal actions. Therefore, we modify each hole action to the form $p\to q(m : D)$ for a message $m$ of type $D$ sent from $p$ to $q$, or $p\to q(\ell)$ for a label sent from $p$ to $q$. We come to the definition of a typed open automaton.
+
+\begin{definition} A typed open automaton is a tuple $A=\langle S, s_0, E, V, \phi_0, T\rangle$, where
+  \begin{itemize}
+    \item $S$ is the set of states
+    \item $s_0\in S$ is the initial state
+    \item $E\subset S$ is the set of terminal states
+    \item $V$ is the set of variables
+    \item $\psi_0: V\to\P$ is the initial assignment
+    \item $T$ is the set of transitions. Each $t\in T$ has the form $\dfrac{\beta_{j}^{j\in J}, g, \psi}{s\xrightarrow{\alpha}s'}$, where
+          \begin{itemize}
+            \item [$\circ$]$s,s'\in S$ and $\alpha$ is an emitted action.
+            \item [$\circ$] each $\beta_{j}$ has the form $p\to q(m : D)$ or $p\to q(\ell)$ such that $p,q\in \ZZ\cup\infty$ and $\ell\in\L$.
+            \item [$\circ$] $g$ is a predicate over $V$
+            \item [$\circ$] $\psi: V\to \E_V$ is a reassignment
+          \end{itemize}
+  \end{itemize}
+  We can ignore the emitted action and write $s\xrightarrow{\beta_{j}^{j\in J}, g, \psi}s'$. A pair $(s, \phi)$, where $s\in S$ and $\phi:V\to\P$ is called a configuration of the automaton.
+\end{definition}
+
+\begin{remark}
+  A transition has no hole actions indicates an internal computing. A transition with more than one action indicates asynchrony.
+\end{remark}
+
+\begin{example}
+  Consider the producer-consumer communication through a three-slot buffer. This can be modelled as an automaton $A=\langle S, s_0, E, V, \phi_0, T\rangle$, where
+  \begin{itemize}
+    \item $S=E=\{s_0\}$
+    \item $V=\{M, f, l\}$
+    \item $\psi_0: M\mapsto [0,0,0], f\mapsto 0, l\mapsto 0$
+    \item $T = \left\{s_0\xrightarrow{\{-1\to 0 (m:\texttt{int})\}((l+1)\% 3 \ne f)\left\{\substack{M[l]\leftarrow m \\ l\leftarrow (l+1)\% 3}\right\}}s_0, s_0\xrightarrow{\{0\to -2 (M[f]:\texttt{int})\}(f \ne l)\{f\leftarrow f+1\}}s_0\right\}$
+  \end{itemize}
+  \label{example:prod-con}
+\end{example}
+
+
+In Example \ref{example:prod-con}, we have used the index $-1$ for the producer and $-2$ for the consumer. The automaton acts as a \textit{mediator}. On one hand, it receives a message from the producer, decide if the message can still be stored. On the other hand, if there is a message available in the buffer, it lets the consumer receive.
+
+% \begin{example}
+%   Consider an encoding of a transmission medium as an automaton $A=\langle S, s_0, E, V, \phi_0, T\rangle$, where
+%   \begin{itemize}
+%     \item $S=E=\{s_0\}$
+%     \item $V=\{N\}$
+%     \item $\psi_0: N\mapsto 0$
+%     \item $T = \left\{s_0\xrightarrow{\{-1\to 0 (m:\texttt{int})\}(\text{True})\left\{N\leftarrow N+1\right\}}s_0, s_0\xrightarrow{\{0\to -2 (M[f]:\texttt{int})\}(f \ne l)\{f\leftarrow f+1\}}s_0\right\}$
+%   \end{itemize}
+% \end{example}
+
+\section{Type Inferred by an Automaton}
+Taking the transitions of an automaton, if we only look at the states and hole actions, we can generate a directed graph where
+\begin{itemize}
+  \item Each node is a \textit{state} of the automaton
+  \item Each edge is inferred from the hole actions, where $p\to q(m : D)$ becomes $p\to q(D)$ and $p\to q(\ell)$ is kept the same.
+\end{itemize}
+
+The type with this graph is called the weak type of the automaton. On the other hand, if we take into account the guard and reassignment, we can generate a graph whose nodes are \textit{configurations} of the automaton. \textit{If such generating process halts}, we get the strong type of the automaton.
+
+\begin{proposition}
+  For every type $S$, there exists an automaton $A$ with no variables inferring $S$. We also have that $S$ is the strong type of $A$.
+\end{proposition}
+
+Note that open automata with no holes are already Turing-complete. The reason is that each transition simulates a GOTO statement, which is conditioned by the guard, and there are also variable reassignments. On the other hand, session type supporting up to recursion is not Turing-complete. Hence the generating process from an open automaton to a type does not always halt. However, I will try to show that maybe
+\begin{itemize}
+  \item Non-halting means that the automaton has an infinite-sized variable.
+  \item If not, we can abstract one more level to ``match'' different configurations, so that the set of reachable abstracted configurations is finite.
+\end{itemize}
+
+
+This suggests that we can use open automata to verify further properties than data type compatibility. For example, adding lists of transferred frames to check if they arrive in order.
+
+
+Taking Example \ref{example:prod-con}, let $U = -1\to 0 (\texttt{int})$ and $V = 0\to -2 (\texttt{int})$, then the weak type of $A$ is $$W = \mu\alpha. (U+V).\alpha,$$
+and the strong type of $A$ is
+$$S=\mu s_0.(U.\mu s_1.(V.s_0 + U.\mu s_2.(V.s_1 + U\mu s_3.V.s_2))).$$
+
+Note that the type $S$ is generated from an automaton with four states and one variable $M$. We should develop a calculus to show that $S\prec W$ because the definition based on directed graph is not computable. Maybe there is already such calculus in type theory textbooks.
+
+Let $U'=0\to\infty(\texttt{int})$ and $V'=\infty\to 0 (\texttt{int})$, we have the following projections
+
+$$W\downharpoonright_{-1}= \mu\alpha.U'.\alpha$$
+
+\begin{align*}
+  S\downharpoonright_{-1} & =\mu s_0.(U'.\mu s_1.(s_0 + U'.\mu s_2.(s_1 + U'\mu s_3.s_2)))                                           \\
+                          & \equiv \mu s_0.(U'.\mu s_1.(s_0 + U'.\mu s_2.(s_1 + U's_2)))                           & [\textsc{Jump}] \\
+                          & \equiv \mu s_0.(U'.\mu s_1.(s_0 + U'.\mu s_2.s_1 + U'\mu s_2.U's_2))                   & [\textsc{Dist}] \\
+                          & \equiv \mu s_0.(U'.\mu s_1.(s_0 + U'.\mu s_2.s_1 + \mu s_2.U's_2))                     & [\textsc{Fold}] \\
+                          & \equiv \mu s_0.(U'.\mu s_1.(s_0 + U'.s_1 + \mu s_2.U's_2))                             & [\textsc{Jump}] \\
+                          & \ldots                                                                                                   \\
+                          & \equiv                                                             \mu\alpha.U'.\alpha
+\end{align*}
+
+Although the strong and weak types are different, their projections onto a child component are the same. This means that any producer able to produce message should be compatible to be compose to the child component.
+
+In addition, strong inference is similar to that we have simulated the automaton, so it ensures deadlock freedom.
+
+% \begin{itemize}
+%   \item Weak inference: graph traversal where each node is a state
+%   \item Strong inference: graph traversal where each node is a configuration
+% \end{itemize}
+
+\section{Composition}
+
+To compose an automaton $A'$ to a hole of $A$, the idea is to compose all compatible actions, reserve all internal actions (of both $A$ and $A'$), and rename internal and external communications if there is any conflict. I will elaborate more.
+
+\begin{example}
+  Consider an implementation of the producer as the open automaton $P$ depicted in Figure \ref{fig:prod}. The strong or weak type of $P$ is $\mu\alpha.U'.\alpha$, so it can be composed to the internal component $-1$ of $A$.
+\end{example}
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+
+    \node[]               (init_assign)
+    {};
+    \node[state, accepting] (p_0) [right=2cm of init_assign] {$p_0$};
+    \node[state] (p_1) [right=5cm of p_0] {$p_1$};
+
+
+    \path[->]
+    (init_assign) edge node {$m\leftarrow 0$} (p_0)
+    (p_0) edge[in=90, out=90, looseness=0.5] node {$\{\}(\text{True})\{m\leftarrow new\,\texttt{int}()\}$} (p_1)
+    (p_1) edge[in=-90, out=-90, looseness=0.5] node[pos=0.5, anchor=north] {$\{0\to\infty(m:\texttt{int})\}(\text{True})\{\}$} (p_0)
+    ;
+  \end{tikzpicture}
+  \caption{An automaton implementing the producer in Example \ref{example:prod-con}}
+  \label{fig:prod}
+\end{figure}
+
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+
+    \node[]               (init_assign)
+    {};
+    \node[state, accepting] (p_0) [right=2cm of init_assign] {$s_0p_0$};
+    \node[state] (p_1) [right=5cm of p_0] {$s_1p_1$};
+
+
+    \path[->]
+    (init_assign) edge node {$\substack{M\leftarrow [0,0,0]\\ m,f,l\leftarrow 0}$} (p_0)
+    (p_0) edge[in=90, out=90, looseness=0.5] node {$\{\}(\text{True})\{m\leftarrow new\,\texttt{int}()\}$} (p_1)
+    (p_1) edge[in=-90, out=-90, looseness=0.5] node[pos=0.5, anchor=north] {$\{\}((l+1)\% 3 \ne f)\left\{\substack{M[l]\leftarrow m\\ l\leftarrow (l+1)\% 3}\right\}$} (p_0)
+    (p_0) edge [loop, in=-120, out=-90, looseness=10] node[pos=0.5, anchor=east] {$\{0\to -2 (M[f]:\texttt{int})\}(f \ne l)\{f\leftarrow f+1\}$} (p_0)
+    (p_1) edge [loop, in=-60, out=-90, looseness=10] node[pos=0.5, anchor=west] {$\{0\to -2 (M[f]:\texttt{int})\}(f \ne l)\{f\leftarrow f+1\}$} (p_1)
+    ;
+  \end{tikzpicture}
+  \caption{The composed automaton}
+  \label{fig:compose}
+\end{figure}
+
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+
+    \node[]               (init_assign)
+    {};
+    \node[state, accepting] (p_0) [right=2cm of init_assign] {$p_0$};
+    \node[state] (p_1) [right=5cm of p_0] {$p_1$};
+
+
+    \path[->]
+    (init_assign) edge node {$m\leftarrow 0$} (p_0)
+    (p_0) edge[in=90, out=90, looseness=0.5] node {$\{-1\to 0 (m':\texttt{int})\}(\text{True})\{m\leftarrow m'\}$} (p_1)
+    (p_1) edge[in=-90, out=-90, looseness=0.5] node[pos=0.5, anchor=north] {$\{0\to\infty(m:\texttt{int})\}(\text{True})\{\}$} (p_0)
+    ;
+  \end{tikzpicture}
+  \caption{A modification of $P$ having internal communication}
+  \label{fig:prod-internal}
+\end{figure}
+
+Consider Figure \ref{fig:prod-internal}. The type of $P$ is now $\mu\alpha.-1\to 0 (\texttt{int}).U'.\alpha$. However, $P$ should also be able to be composed to $A$.
+
+\section{Plans}
+
+\begin{enumerate}
+  \item Refine the notion of composition and compatibility
+  \item Find conditions where strong inference is decidable
+  \item I think that for every open automaton, there exists a single-state automaton equivalent to it (just by let one more variable for state). But automata with more states and fewer variables are of course easier to verify. I will investigate whether this has something to do with bisimulation after two objectives above are done.
+\end{enumerate}
+

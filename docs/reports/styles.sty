@@ -1,0 +1,93 @@
+\ProvidesPackage{styles}
+
+\RequirePackage{graphicx}
+\RequirePackage{algorithmic}
+\RequirePackage{algorithm}
+
+
+
+%%%%% ENVIRONMENTS %%%%%%%%%%%
+\newenvironment{solution}{%
+  \renewcommand{\qedsymbol}{$\blacksquare$}% Change the QED symbol to black square
+  \proof[Solution]% Start proof environment with "Solution" instead of "Proof"
+}{%
+  \endproof% End proof environment
+}
+
+% \newcommand{\IncImg}[3]{
+%     \begin{figure}[htp]
+%         \centering
+%         \includegraphics[width = #2]{#1}
+%         \ifx&#3&%
+%         %   \caption{#3}
+%         \else
+%             \vspace{1cm}
+%            \caption{#3}
+%         \fi
+%         \label{figure:#1}
+%     \end{figure}
+% }
+
+\newtheoremstyle{mytheoremstyle}
+  {10pt} % Space above
+  {10pt} % Space below
+  {\itshape} % Font style of the body
+  {} % Indent amount
+  {\bfseries} % Theorem head font style (bold)
+  {} % Punctuation after theorem head
+  {.5em} % Space after theorem head
+  {\textbf{\thmname{#1}\thmnumber{ #2}\thmnote{ (#3)}}} % Theorem head spec (bold name and brackets)
+
+\theoremstyle{mytheoremstyle}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{proposition}[theorem]{Proposition}
+
+\newtheorem{sbtheorem}{Theorem}[section]
+
+
+\newtheoremstyle{examplestyle}
+  {10pt}   % Space above
+  {10pt}   % Space below
+  {}          % Body font
+  {}          % Indent amount
+  {\bfseries} % Theorem head font
+  {.}         % Punctuation after theorem head
+  {.5em}      % Space after theorem head
+  {}          % Theorem head spec (can be left empty, meaning `normal`)
+
+\theoremstyle{examplestyle}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{remark}[theorem]{Remark}
+  
+
+\renewcommand\thesection{\arabic{section}}
+\renewcommand\thechapter{\Roman{chapter}}
+
+%%% NAMES %%%
+\renewcommand{\chaptername}{Chapter}
+\renewcommand{\figurename}{Figure}
+\renewcommand{\tablename}{Table}
+\renewcommand{\contentsname}{Contents}
+\renewcommand{\listfigurename}{List of Figures}
+\renewcommand{\listtablename}{List of Tables}
+\renewcommand{\bibname}{References}
+
+% \counterwithin{figure}{chapter}
+% \renewcommand{\thefigure}{\arabic{chapter}.\arabic{figure}}
+
+\counterwithout{figure}{chapter}
+\renewcommand{\thefigure}{\arabic{figure}}
+\counterwithout{equation}{chapter}
+\renewcommand{\theequation}{\arabic{equation}}
+
+
+% \counterwithin{equation}{subsection}
+% \renewcommand{\theequation}{\arabic{chapter}.\arabic{section}.\arabic{equation}}
+
+\counterwithin{table}{chapter}
+\renewcommand{\thetable}{\arabic{chapter}.\arabic{table}}
+

@@ -4,14 +4,22 @@
     "Acks",
     "ACSYON",
     "Asynchrony",
+    "bisimulation",
+    "Inferenced",
+    "Kleen",
     "mathcal",
+    "metavariable",
+    "metavariables",
     "nodenext",
+    "relaxedly",
     "resends",
+    "subtyping",
     "unack",
     "Unacked"
   ],
   "cSpell.ignorePaths": [
     "**/*/main.tex",
-    "**/*.sty"
+    "**/*.sty",
+    "**/*/slides.tex",
   ]
 }

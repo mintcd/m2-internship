@@ -1,5 +1,6 @@
 \documentclass[a4paper,twoside]{report}
 \usepackage[utf8]{inputenc}
+% \usepackage[a4paper, width=150mm, top=25mm, bottom=25mm, bindingoffset=6mm]{geometry}
 \usepackage{fancyhdr}
 \pagestyle{fancy}
  \fancyhead{}
@@ -10,6 +11,8 @@
  \renewcommand{\footrulewidth}{0.2pt}
  \setlength{\headheight}{14.5pt}
 
+
+% \usepackage{epsfig,epic,eepic,units}
 \usepackage{hyperref} %allows to add hyperlinks and cross reference in-text
 \usepackage{textcomp} %this is for symbols such as copyright etc
 \usepackage{url} %for adding urls obvs so they appear always in one line without breaks
@@ -20,9 +23,6 @@
 \usepackage{bigstrut} %tables
 \usepackage{amssymb} %adding arrows tbh for chemistry you can just use chemmacros \begin{reaction} environment
 \usepackage{amsmath} %for writing maths
-\usepackage{mathtools}
-\usepackage{amsthm}
-\usepackage{chngcntr}
 \usepackage{adjustbox}%supplement to graphics package
 \usepackage{graphicx}
 \usepackage{lscape} %allows to add certain pages in landscape
@@ -37,26 +37,27 @@
     right=2cm,
     top=2.75cm,
     bottom=3cm,
-    footskip=20pt,
+    footskip=0cm,
     twoside]{geometry}
 
-\usepackage{tikz}
+    \usepackage{tikz}
 \usetikzlibrary {automata,positioning}
-\usepackage{enumitem}
-\usepackage{pifont}
-\usepackage{proof}
 
-
+% add commands
 \usepackage{commands}
-\usepackage{styles}
 
 \addbibresource{refs.bib}
 
 \begin{document}
 \sloppy
 
-\input{weeks/week7}
+\include{title} %title file for the front page
+\renewcommand*\contentsname{Table of Contents} %this is to have the correct heading on the ToC
+\tableofcontents %make table of contents
 
+\include{chapters/section-types
+}
+\include{chapters/open-automata}
 \printbibliography
 
 \end{document}
